@@ -114,12 +114,68 @@ function GuestNameModal({ value, onSave, onClose }) {
   );
 }
 
-export default function Concierge() {
+async function sendEmail(guestMsg, aiReply) {
+  try {
+    const cfg = JSON.parse(localStorage.getItem("lanai_email_config") || "{}");
+    if (!cfg.serviceId || !cfg.templateId || !cfg.publicKey || !cfg.ownerEmail) return;
+    await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        service_id: cfg.serviceId,
+        template_id: cfg.templateId,
+        user_id: cfg.publicKey,
+        template_params: {
+          guest_message: guestMsg,
+          ai_reply: aiReply.slice(0, 300),
+          time: new Date().toLocaleString(),
+          guest_name: localStorage.getItem("lanai_guest_name") || "Guest",
+          to_email: cfg.ownerEmail,
+        },
+      }),
+    });
+  } catch {}
+}
+
+function EmailSettingsModal({ onClose }) {
+  const [cfg, setCfg] = useState(() => { try { return JSON.parse(localStorage.getItem("lanai_email_config") || "{}"); } catch { return {}; } });
+  const f = k => e => setCfg(p => ({ ...p, [k]: e.target.value }));
+  const save = () => { localStorage.setItem("lanai_email_config", JSON.stringify(cfg)); onClose(); };
+  const inputStyle = { width: "100%", background: "rgba(255,255,255,0.7)", border: `1px solid ${BORDER}`, borderRadius: 10, padding: "10px 14px", color: SLATE, fontSize: 14, fontFamily: "'Jost', sans-serif", outline: "none", boxSizing: "border-box", marginBottom: 12 };
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(42,63,72,0.5)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: BG, borderRadius: 24, padding: 28, width: "100%", maxWidth: 420, maxHeight: "90vh", overflowY: "auto" }}>
+        <h2 style={{ color: SLATE, fontSize: 20, fontWeight: 400, marginBottom: 4, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>Email Alerts</h2>
+        <p style={{ color: MID, fontSize: 12, fontFamily: "'Jost', sans-serif", marginBottom: 16, lineHeight: 1.6 }}>
+          Sign up free at <strong>emailjs.com</strong> → create a service (Gmail works) → create a template using <strong>{"{{guest_name}}"}</strong>, <strong>{"{{guest_message}}"}</strong>, <strong>{"{{ai_reply}}"}</strong>, <strong>{"{{time}}"}</strong> → paste your IDs below.
+        </p>
+        {[
+          { key: "serviceId", label: "Service ID", placeholder: "service_xxxxxxx" },
+          { key: "templateId", label: "Template ID", placeholder: "template_xxxxxxx" },
+          { key: "publicKey", label: "Public Key", placeholder: "your_public_key" },
+          { key: "ownerEmail", label: "Your Email", placeholder: "mike@example.com" },
+        ].map(({ key, label, placeholder }) => (
+          <div key={key}>
+            <label style={{ color: MID, fontSize: 11, fontFamily: "'Jost', sans-serif", display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</label>
+            <input value={cfg[key] || ""} onChange={f(key)} placeholder={placeholder} style={inputStyle} />
+          </div>
+        ))}
+        <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+          <button onClick={onClose} style={{ flex: 1, background: "rgba(255,255,255,0.4)", border: `1px solid ${BORDER}`, borderRadius: 12, padding: 12, color: MID, fontSize: 14, fontFamily: "'Jost', sans-serif", cursor: "pointer" }}>Cancel</button>
+          <button onClick={save} style={{ flex: 2, background: SLATE, border: "none", borderRadius: 12, padding: 12, color: "#fff", fontSize: 14, fontFamily: "'Jost', sans-serif", fontWeight: 500, cursor: "pointer" }}>Save</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
   const [messages, setMessages] = useState([WELCOME]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [showLog, setShowLog] = useState(false);
   const [showName, setShowName] = useState(false);
+  const [showEmail, setShowEmail] = useState(false);
   const [guestName, setGuestName] = useState(() => localStorage.getItem("lanai_guest_name") || "");
   const [chatLog, setChatLog] = useState(() => { try { return JSON.parse(localStorage.getItem("lanai_chat_log") || "[]"); } catch { return []; } });
   const [sessionId] = useState(() => Date.now());
@@ -166,6 +222,7 @@ export default function Concierge() {
       const reply = data.content?.find(b => b.type === "text")?.text || "I'm having trouble connecting. Please reach out to Mike at 919.345.6063.";
       setMessages(prev => [...prev, { role: "assistant", content: reply }]);
       saveToLog(userText, reply);
+      sendEmail(userText, reply);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "Something went wrong. Please try again or contact Mike at 919.345.6063." }]);
     } finally {
@@ -181,6 +238,9 @@ export default function Concierge() {
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 12 }}>
           <button onClick={() => setShowLog(true)} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "6px 14px", color: MID, fontSize: 11, fontFamily: "'Jost', sans-serif", cursor: "pointer" }}>
             Chat Log{chatLog.length > 0 ? ` · ${chatLog.length}` : ""}
+          </button>
+          <button onClick={() => setShowEmail(true)} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "6px 14px", color: MID, fontSize: 11, fontFamily: "'Jost', sans-serif", cursor: "pointer" }}>
+            Email Alerts
           </button>
           <button onClick={() => setShowName(true)} style={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 20, padding: "6px 14px", color: MID, fontSize: 11, fontFamily: "'Jost', sans-serif", cursor: "pointer" }}>
             {guestName || "Guest Name"}
@@ -243,6 +303,7 @@ export default function Concierge() {
       </div>
 
       {showLog && <ChatLogModal log={chatLog} onClear={() => { setChatLog([]); localStorage.removeItem("lanai_chat_log"); }} onClose={() => setShowLog(false)} />}
+      {showEmail && <EmailSettingsModal onClose={() => setShowEmail(false)} />}
       {showName && <GuestNameModal value={guestName} onSave={n => { setGuestName(n); localStorage.setItem("lanai_guest_name", n); setShowName(false); }} onClose={() => setShowName(false)} />}
       <style>{`@keyframes pulse{0%,100%{transform:scale(0.7);opacity:0.4}50%{transform:scale(1);opacity:1}}::-webkit-scrollbar{display:none}`}</style>
     </div>
