@@ -169,7 +169,7 @@ function EmailSettingsModal({ onClose }) {
   );
 }
 
-
+export default function Concierge() {
   const [messages, setMessages] = useState([WELCOME]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
