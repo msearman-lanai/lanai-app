@@ -28,7 +28,7 @@ BEACH & SNORKELING: Head RIGHT from beach along rocks for snorkeling — fish, r
 
 CAR RENTALS: Arthur Turnquest (turnquestcarrental@gmail.com) — go-to, mention Mike's place. Chris Darling (WhatsApp: 242.553.6638). Pick Pay Rentals (pickpayrentals.com). Agatha Hepburn (WhatsApp: 242.816.7213) — around the corner, also does catering.
 
-BOAT TRIPS: Captain James picks up from beach at Lanai! Fishing, snorkeling, stingrays, swimming pigs (~10 min away), isolated beaches. WhatsApp: +1 (242) 470-0671.
+BOAT TRIPS: Captain James picks up from beach at Lanai!Can go to Spanish Wells but not Harbour Island. Fishing, snorkeling, stingrays, swimming pigs (~10 min away), isolated beaches. WhatsApp: +1 (242) 470-0671.
 
 RESTAURANTS (nearby): Daddy Joe's (20 min) — MUST, great lunch/dinner, near Gaulding Cay. Uncle Tommy's Bakery (15 min) — coconut bread Thursdays, pizza Fridays, best conch fritters. LeLe's Pizzas (20 min) — delivers to Current! The Cove Eleuthera — great for nicer dinner, call ahead. El Karaka Glass Window Bar & Grill (20 min) — unbeatable views. Bahamas Paradise Farms / Eddy's Kitchen — pizza delivers to Current.
 
